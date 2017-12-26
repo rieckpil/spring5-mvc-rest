@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/customers")
 public class CustomerController {
 
-    private  final CustomerService customerService;
+    private final CustomerService customerService;
 
     public CustomerController(CustomerService customerService) {
         this.customerService = customerService;
@@ -29,7 +29,7 @@ public class CustomerController {
     @GetMapping("/{id}")
     public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable("id") String id) {
         return new ResponseEntity<>(
-               customerService.getCustomerById(Long.valueOf(id)), HttpStatus.OK
+                customerService.getCustomerById(Long.valueOf(id)), HttpStatus.OK
         );
     }
 
@@ -52,5 +52,12 @@ public class CustomerController {
         return new ResponseEntity<CustomerDTO>(
                 customerService.patchCustomer(customerDTO, Long.valueOf(id)), HttpStatus.OK
         );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable("id") String id) {
+
+        customerService.deleteCustomerById(Long.valueOf(id));
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
