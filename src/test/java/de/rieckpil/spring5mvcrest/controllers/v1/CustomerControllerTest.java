@@ -3,7 +3,9 @@ package de.rieckpil.spring5mvcrest.controllers.v1;
 import static org.junit.Assert.*;
 
 import de.rieckpil.spring5mvcrest.api.v1.model.CustomerDTO;
+import de.rieckpil.spring5mvcrest.controllers.RestResponseEntityExceptionHandler;
 import de.rieckpil.spring5mvcrest.service.CustomerService;
+import de.rieckpil.spring5mvcrest.service.ResourceNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -13,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import javax.annotation.Resource;
 import java.util.Arrays;
 
 import static org.hamcrest.Matchers.equalTo;
@@ -38,7 +41,9 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mockMvc = MockMvcBuilders.standaloneSetup(customerController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(customerController)
+                .setControllerAdvice(new RestResponseEntityExceptionHandler())
+                .build();
     }
 
     @Test
@@ -150,4 +155,16 @@ public class CustomerControllerTest extends AbstractRestControllerTest {
                 .andExpect(jsonPath("$.lastName", equalTo("Flintstone")))
                 .andExpect(jsonPath("$.customerUrl", equalTo("/api/v1/customers/1")));
     }
+
+    @Test
+    public void testGetByIdNotFound() throws  Exception {
+
+        when(customerService.getCustomerById(1L)).thenThrow(ResourceNotFoundException.class);
+
+        mockMvc.perform(get(CustomerController.BASE_URL + "/1")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+    }
+
 }
